@@ -1,4 +1,19 @@
+/*
 
+==============================================================================================
+
+Create Tables in Bronze level
+
+=============================================================================================
+
+Script Purpose:
+  This script creates tables in Bronze Schema to load data from data surces CRM and ERP -- checking if it already exists.
+  If the Tables exist, they are dropped and recreated.
+
+Warning:
+  Running this script will drop the entire tables in Bronze Schema if they exist.
+  All data in the tables will be permanently deleted. Proceed with caution and ensure you have proper backups before running this script.
+*/
 
 
 IF OBJECT_ID ('bronze.crm_cust_info', 'U') IS NOT NULL
