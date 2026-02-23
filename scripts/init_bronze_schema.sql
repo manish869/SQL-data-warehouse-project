@@ -1,84 +1,152 @@
-/*
-
-==============================================================================================
-
-Create Tables in Bronze level
-
-=============================================================================================
-
+/* Stored Procedure: Load Bronze Layer (Source -> Bronze)
+===============================================================================
 Script Purpose:
-  This script creates tables in Bronze Schema to load data from data surces CRM and ERP -- checking if it already exists.
-  If the Tables exist, they are dropped and recreated.
+    This stored procedure loads data into the 'bronze' schema from external CSV files. 
+    It performs the following actions:
+    - Truncates the bronze tables before loading data.
+    - Uses the `BULK INSERT` command to load data from csv Files to bronze tables.
 
-Warning:
-  Running this script will drop the entire tables in Bronze Schema if they exist.
-  All data in the tables will be permanently deleted. Proceed with caution and ensure you have proper backups before running this script.
+Parameters:
+    None. 
+	  This stored procedure does not accept any parameters or return any values.
+=================================================================================
 */
 
 
-IF OBJECT_ID ('bronze.crm_cust_info', 'U') IS NOT NULL
-	DROP TABLE bronze.crm_cust_info;
-CREATE TABLE bronze.crm_cust_info(
-cst_id INT,
-cst_key NVARCHAR (50),
-cst_firstname NVARCHAR (50),
-cst_lastname NVARCHAR (50),
-cst_marital_status NVARCHAR(50),
-cst_gndr NVARCHAR(50),
-cst_create_date DATE
-);
+CREATE OR ALTER PROCEDURE bronze.load_bronze AS
+
+BEGIN
+	DECLARE @bstart_time DATETIME, @bend_time DATETIME, @start_time DATETIME, @end_time DATETIME;
+	
+	
+	BEGIN TRY
+		SET @bstart_time = GETDATE();
+
+		PRINT '================================================================================';
+		PRINT 'Loading Bronze Layer';
+		PRINT '================================================================================';
 
 
-IF OBJECT_ID ('bronze.crm_prd_info', 'U') IS NOT NULL
-	DROP TABLE bronze.crm_prd_info;
-CREATE TABLE bronze.crm_prd_info(
-prd_id INT,
-prd_key NVARCHAR (50),
-prd_nm NVARCHAR (50),
-prd_cost Int,
-prd_line NVARCHAR (50),
-prd_start_dt DATETIME,
-prd_end_dt DATETIME
-);
+		PRINT '================================================================================';
+		PRINT 'Loading CRM Tables';
+		PRINT '================================================================================';
 
 
-IF OBJECT_ID ('bronze.crm_sales_details', 'U') IS NOT NULL
-	DROP TABLE bronze.crm_sales_details;
-CREATE TABLE bronze.crm_sales_details(
-sls_ord_num NVARCHAR (50),
-sls_prd_key NVARCHAR (50),
-sls_cust_id INT,
-sls_order_dt INT,
-sls_ship_dt INT,
-sls_due_dt INT,
-sls_sales INT,
-sls_quantity INT,
-sls_price INT
-);
+		SET @start_time = GETDATE();
+		PRINT '>>Truncating table: bronze.crm_cust_info  --';
+		TRUNCATE TABLE bronze.crm_cust_info;
+
+		PRINT '>>Inserting data into: bronze.crm_cust_info  --';
+		BULK INSERT bronze.crm_cust_info
+		FROM 'C:\Users\MANISH\Downloads\Compressed\dbc9660c89a3480fa5eb9bae464d6c07_2\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
+		WITH(
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK
+		);
+		SET @end_time = GETDATE();
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second , @start_time, @end_time) AS NVARCHAR) + 'seconds';
+		PRINT '------------------------------------------------------------'
 
 
-IF OBJECT_ID ('bronze.erp_cust_az12', 'U') IS NOT NULL
-	DROP TABLE bronze.erp_cust_az12;
-CREATE TABLE bronze.erp_cust_az12(
-cid NVARCHAR (50),
-bdate DATE,
-gen NVARCHAR (50),
-);
+		SET @start_time = GETDATE();
+		PRINT '>>Truncating table: bronze.crm_prd_info  --';
+		TRUNCATE TABLE bronze.crm_prd_info;
+
+		PRINT '>>Inserting data into: bronze.crm_prd_info  --';
+		BULK INSERT bronze.crm_prd_info
+		FROM 'C:\Users\MANISH\Downloads\Compressed\dbc9660c89a3480fa5eb9bae464d6c07_2\sql-data-warehouse-project\datasets\source_crm\prd_info.csv'
+		WITH(
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK
+		);
+		SET @end_time = GETDATE();
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second , @start_time, @end_time) AS NVARCHAR) + 'seconds';
+		PRINT '------------------------------------------------------------'
+
+		SET @start_time = GETDATE();
+		PRINT '>>Truncating table: bronze.crm_sales_details  --';
+		TRUNCATE TABLE bronze.crm_sales_details;
+
+		PRINT '>>Inserting data into: bronze.crm_sales_details  --';
+		BULK INSERT bronze.crm_sales_details
+		FROM 'C:\Users\MANISH\Downloads\Compressed\dbc9660c89a3480fa5eb9bae464d6c07_2\sql-data-warehouse-project\datasets\source_crm\sales_details.csv'
+		WITH(
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK
+		);
+		SET @end_time = GETDATE();
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second , @start_time, @end_time) AS NVARCHAR) + 'seconds';
+		PRINT '------------------------------------------------------------'
+
+		PRINT '================================================================================';
+		PRINT 'Loading ERP Tables'
+		PRINT '================================================================================';
+
+		SET @start_time = GETDATE();
+		PRINT '>>Truncating table: bronze.erp_cust_az12  --';
+		TRUNCATE TABLE bronze.erp_cust_az12;
+
+		PRINT '>>Inserting data into: bronze.erp_cust_az12  --';
+		BULK INSERT bronze.erp_cust_az12
+		FROM 'C:\Users\MANISH\Downloads\Compressed\dbc9660c89a3480fa5eb9bae464d6c07_2\sql-data-warehouse-project\datasets\source_erp\CUST_AZ12.csv'
+		WITH(
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK
+		);
+		SET @end_time = GETDATE();
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second , @start_time, @end_time) AS NVARCHAR) + 'seconds';
+		PRINT '------------------------------------------------------------'
+
+		SET @start_time = GETDATE();
+		PRINT '>>Truncating table: bronze.erp_loc_a101  --';
+		TRUNCATE TABLE bronze.erp_loc_a101;
+
+		PRINT '>>Inserting data into: bronze.erp_loc_a101  --';
+		BULK INSERT bronze.erp_loc_a101
+		FROM 'C:\Users\MANISH\Downloads\Compressed\dbc9660c89a3480fa5eb9bae464d6c07_2\sql-data-warehouse-project\datasets\source_erp\loc_a101.csv'
+		WITH(
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK
+		);
+		SET @end_time = GETDATE();
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second , @start_time, @end_time) AS NVARCHAR) + 'seconds';
+		PRINT '------------------------------------------------------------'
 
 
-IF OBJECT_ID ('bronze.loc_a101', 'U') IS NOT NULL
-	DROP TABLE bronze.loc_a101;
-CREATE TABLE bronze.loc_a101(
-cid NVARCHAR (50),
-cntry NVARCHAR (50)
-);
+		SET @start_time = GETDATE();
+		PRINT '>>Truncating table: bronze.erp_px_cat_g1v2  --';
+		TRUNCATE TABLE bronze.erp_px_cat_g1v2;
 
+		PRINT '>>Inserting data into: bronze.erp_px_cat_g1v2  --';
+		BULK INSERT bronze.erp_px_cat_g1v2
+		FROM 'C:\Users\MANISH\Downloads\Compressed\dbc9660c89a3480fa5eb9bae464d6c07_2\sql-data-warehouse-project\datasets\source_erp\px_cat_g1v2.csv'
+		WITH(
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ',',
+			TABLOCK
+		);
+		SET @end_time = GETDATE();
+		PRINT '>> Load Duration: ' + CAST(DATEDIFF(second , @start_time, @end_time) AS NVARCHAR) + 'seconds';
+		PRINT '------------------------------------------------------------';
+	
+	SET @bend_time = GETDATE();
+	PRINT '=========================================='
+		PRINT 'Loading Bronze Layer is Completed';
+	PRINT '   - Total Load Duration: ' + CAST(DATEDIFF(second, @bstart_time, @bend_time) AS NVARCHAR) + 'seconds' ;
+	PRINT '=========================================='
 
-IF OBJECT_ID ('bronze.px_cat_g1v2', 'U') IS NOT NULL
-	DROP TABLE bronze.px_cat_g1v2
-CREATE TABLE bronze.px_cat_g1v2(
-id NVARCHAR (50),
-cat NVARCHAR (50),
-subcat NVARCHAR (50),
-maintenance NVARCHAR (50)
-);
+	END TRY
+	BEGIN CATCH
+		PRINT '===================================================================';
+		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER';
+		PRINT 'Error Message' + ERROR_MESSAGE();
+		PRINT 'Error Message' + CAST(ERROR_NUMBER() AS  NVARCHAR);
+		PRINT 'Error Message' + CAST(ERROR_STATE() AS NVARCHAR);
+		PRINT '===================================================================';
+	END CATCH
+END
