@@ -1,3 +1,20 @@
+/*
+
+==============================================================================================
+
+Bulk Upload data from data sources to the data warehouse
+=============================================================================================
+
+Script Purpose:
+  This script loads data from data surces CRM and ERP -- checking if it already exists.
+  If the data exists, data is replaced and overwritten.
+
+Warning:
+  Running this script will overwrite any data already existing in the tables .
+  All data in the tables will be overwritten. Proceed with caution and ensure you have proper backups before running this script.
+*/
+
+
 
 -- Truncate and Bulk Load data from cust_info.csv file to bronze.crm_cust_info table --
 TRUNCATE TABLE bronze.crm_cust_info;
