@@ -2,11 +2,11 @@
 
 ==============================================================================================
 
-Bulk Upload data from data sources to the data warehouse
+Bulk Upload data from data sources to the bronze layer of data warehouse
 =============================================================================================
 
 Script Purpose:
-  This script loads data from data surces CRM and ERP -- checking if it already exists.
+  This script loads data from data surces CRM and ERP to bronze layer -- checking if it already exists.
   If the data exists, data is replaced and overwritten.
 
 Warning:
